@@ -1,7 +1,7 @@
 import fitz  # PyMuPDF
 from pdf2docx import Converter
 from pypdf import PdfWriter
-from gtts import gTTS # type: ignore
+from gtts import gTTS  # type: ignore
 from PIL import Image, ImageTk
 import os
 import json
@@ -52,7 +52,7 @@ def convert_pdf_to_mp3():
         text_content = ""
         for page in doc:
             text_content += page.get_text() + "\n\n"
-        
+
         tts = gTTS(text_content, lang='en')
         tts.save(output_path)
         messagebox.showinfo("Success", "PDF converted to MP3 successfully!")
@@ -146,16 +146,45 @@ def convert_pdf_to(format):
         messagebox.showerror("Error", f"Failed to convert PDF to {format.upper()}. Debug Info: {str(e)}")
 
 
+def convert_image_to_pdf():
+    file_paths = filedialog.askopenfilenames(title="Select Image Files", filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.tiff")])
+    if not file_paths:
+        messagebox.showwarning("Warning", "No image file selected!")
+        return
+    
+    # Ask user for the output PDF file location
+    output_path = filedialog.asksaveasfilename(
+        title="Save PDF As",
+        defaultextension=".pdf",
+        filetypes=[("PDF Files", "*.pdf")]
+    )
+    if not output_path:
+        messagebox.showwarning("Warning", "No output file selected!")
+        return
+
+    try:
+        # Open the first image to start the PDF
+        image = Image.open(file_paths[0])
+        # Convert the rest of the images (if any) to RGB mode and append
+        image_list = [Image.open(img).convert("RGB") for img in file_paths[1:]]
+
+        # Save the images as a PDF
+        image.save(output_path, save_all=True, append_images=image_list)
+
+        messagebox.showinfo("Success", "Images successfully converted to PDF!")
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to convert images to PDF. Debug Info: {str(e)}")
+
+
 # Main GUI
 def main():
     root = tk.Tk()
 
     # Set the window title and size
     root.title("Maple pdf")
-    root.geometry("750x750")
-    root.configure(bg="#FF7733")
+    root.geometry("1000x800")
+    root.configure(bg="#BF2EF0")
 
-    # Set custom image as window icon (PNG to ICO conversion if needed)
     try:
         # Use PIL to open a PNG image
         icon_image = Image.open("logo.png")  # Replace with your image path
@@ -166,22 +195,33 @@ def main():
         print(f"Failed to set window icon: {e}")
 
     # Title Label
-    title_label = tk.Label(root, text="Maple pdf", font=("Forte", 90, "bold"), bg="#FF7733", fg="#15616D")
+    title_label = tk.Label(root, text="Maple pdf", font=("Forte", 90, "bold"), bg="#BF2EF0", fg="#FEECB3")
     title_label.pack(pady=10)
 
-    frame = tk.Frame(root, padx=20, pady=20, bg="#FF7733")
-    frame.pack(pady=10)
+    frame = tk.Frame(root, padx=20, pady=20, bg="#BF2EF0")
+    frame.pack(pady=20)
 
-    merge_label = tk.Label(frame, text="Merge PDFs", font=("Felix Titling", 14, "bold"), bg="#FF7733", fg="#FFECD1")
-    merge_label.grid(row=0, column=0, columnspan=2, pady=10)
+    # Convert Image to PDF Section
+    image_to_pdf_label = tk.Label(frame, text="Convert Image to PDF", font=("Felix Titling", 14, "bold"), bg="#BF2EF0", fg="#FFECD1")
+    image_to_pdf_label.grid(row=0, column=0, columnspan=3, pady=10)
 
-    ttk.Button(frame, text="Merge PDFs", width=30, command=PDFmerge).grid(row=1, column=0, columnspan=2, pady=10)
+    ttk.Button(frame, text="Convert Images to PDF", width=20, command=convert_image_to_pdf).grid(row=1, column=0, columnspan=3, pady=10)
 
     separator = ttk.Separator(frame, orient='horizontal')
-    separator.grid(row=2, column=0, columnspan=2, sticky="ew", pady=10)
+    separator.grid(row=2, column=0, columnspan=3, sticky="ew", pady=10)
 
-    convert_label = tk.Label(frame, text="Convert PDF", font=("Felix Titling", 14, "bold"), bg="#FF7733", fg="#FFECD1")
-    convert_label.grid(row=3, column=0, columnspan=2, pady=10)
+    # Merge PDFs Section
+    merge_label = tk.Label(frame, text="Merge PDFs", font=("Felix Titling", 14, "bold"), bg="#BF2EF0", fg="#FFECD1")
+    merge_label.grid(row=3, column=0, columnspan=3, pady=10)
+
+    ttk.Button(frame, text="Merge PDFs", width=30, command=PDFmerge).grid(row=4, column=0, columnspan=3, pady=10)
+
+    separator2 = ttk.Separator(frame, orient='horizontal')
+    separator2.grid(row=5, column=0, columnspan=3, sticky="ew", pady=10)
+
+    # Convert PDF Section
+    convert_label = tk.Label(frame, text="Convert PDF", font=("Felix Titling", 14, "bold"), bg="#BF2EF0", fg="#FFECD1")
+    convert_label.grid(row=6, column=0, columnspan=3, pady=10)
 
     formats = [
         ("Convert to DOCX", lambda: convert_pdf_to("docx")),
@@ -189,26 +229,35 @@ def main():
         ("Convert to HTML", lambda: convert_pdf_to("html")),
         ("Convert to XML", lambda: convert_pdf_to("xml")),
         ("Convert to JSON", lambda: convert_pdf_to("json")),
-        ("Convert to Markdown", lambda: convert_pdf_to("md")),
+        ("Convert to MD", lambda: convert_pdf_to("md")),
         ("Convert to CSV", lambda: convert_pdf_to("csv")),
         ("Convert to PNG", lambda: convert_pdf_to("png")),
         ("Convert to JPG", lambda: convert_pdf_to("jpg")),
-        ("Convert to GIF", lambda: convert_pdf_to("gif")),
-        ("Convert to SVG", lambda: convert_pdf_to("svg")),
-        ("Convert to MP3", convert_pdf_to_mp3),
+        ("Convert to EPUB", lambda: convert_pdf_to("epub")),
+        ("Convert to MP3", convert_pdf_to_mp3)
     ]
 
-    for i, (text, command) in enumerate(formats):
-        ttk.Button(frame, text=text, width=60, command=command).grid(row=4 + i, column=0, columnspan=2, pady=5)
+    # Create buttons for each format in a horizontal manner
+    row = 7  # Start from row 7
+    col = 0  # Start from column 0
 
-    footer_label = tk.Label(root, text="Made with love by shibbux", font=("Arial", 20), bg="#FF7733", fg="#FFECD1")
+    for i, (text, command) in enumerate(formats):
+        ttk.Button(frame, text=text, width=30, command=command).grid(row=row, column=col, padx=5, pady=5)
+        col += 1
+        # Move to the next row when 3 buttons are placed
+        if col > 2:
+            col = 0
+            row += 1
+
+    footer_label = tk.Label(root, text="Made with love by shibbux", font=("Arial", 20), bg="#BF2EF0", fg="#FFECD1")
     footer_label.pack(side="bottom", pady=1)
 
-    git_prom = tk.Label(root, text="Follow (shibbux) on github ", font=("Arial", 30), bg="#FF7733", fg="#FFECD1")
+    git_prom = tk.Label(root, text="Follow (shibbux) on github ", font=("Arial", 30), bg="#BF2EF0", fg="#FFECD1")
     git_prom.pack(side="bottom", pady=1)
 
     root.mainloop()
 
 
+# Run the main function
 if __name__ == "__main__":
     main()
