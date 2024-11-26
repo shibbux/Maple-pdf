@@ -29,6 +29,13 @@ Maple PDF is a versatile and user-friendly Python-based application for managing
 
 ---
 
+## Download for windows 10 or 11
+
+https://drive.google.com/file/d/1JqQrPBIC3WJEb4uUaH5ai5etN0Tip-6W/view?usp=sharing
+
+### No need of any installation
+### Just download the  .exe file from google drive and run 
+
 ## Installation 🛠️
 
 ### Prerequisites:
