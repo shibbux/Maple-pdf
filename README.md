@@ -108,7 +108,7 @@ This project is licensed under the MIT License. See the `LICENSE` file for more 
 Made with ❤️ by **[shibbux](https://github.com/shibbux)**
 
 - GitHub: [shibbux](https://github.com/shibbux)
-- Twitter: [@shibbux](https://twitter.com/shibbux)
+- Twitter: [@shibbux](https://x.com/shibbuxx)
 
 ---
 
